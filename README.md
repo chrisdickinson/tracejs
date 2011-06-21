@@ -9,7 +9,7 @@ Examples
 Creating a nice color trace with context, reversed so that the latest call is printed last:
 
 ````javascript
-var trace = require('trace');
+var trace = require('tracejs').trace;
 
 try {
     somethingThatThrowsAnError();
@@ -22,7 +22,7 @@ try {
 Iterating through frames and grabbing the constituent files:
 
 ````javascript
-var trace = require('trace');
+var trace = require('tracejs').trace;
 
 try {
     somethingThatThrowsAnError();
@@ -49,9 +49,9 @@ Holds the original error, the first line of the trace (the message), and the fra
 
 Members:
 
-*. `frames`: an `Array` of `Frame` objects.
-*. `first_line`: the first line of the original stack trace -- usually contains the error message, if any.
-*. `original_error`: the original `Error` object that the `Trace` was generated from.
+*  `frames`: an `Array` of `Frame` objects.
+*  `first_line`: the first line of the original stack trace -- usually contains the error message, if any.
+*  `original_error`: the original `Error` object that the `Trace` was generated from.
 
 Trace.defaults
 --------------
@@ -71,10 +71,10 @@ Contains information about a specific stack frame.
 
 Members:
 
-*. `named_location`: The name of the scope where the frame originated; e.g., `'ReadStream.emit'`.
-*. `filename`: The filename of the frame.
-*. `line`: The integer line number of the frame.
-*. `character`: The character at which the error occurred in the line of the frame.
+*  `named_location`: The name of the scope where the frame originated; e.g., `'ReadStream.emit'`.
+*  `filename`: The filename of the frame.
+*  `line`: The integer line number of the frame.
+*  `character`: The character at which the error occurred in the line of the frame.
 
 Frame#filedata()
 --------------
