@@ -2,7 +2,8 @@ var fs = require('fs'),
     natives = process.binding('natives'),
     color = require('ansi-color').set;
 
-var err_re = /    at ([^\s]+) \(([\w\d\._\-\/]+):(\d+):(\d+)\)/g;
+var err_re1 = /    at ([^\s]+) \(([\w\d\._\-\/]+):(\d+):(\d+)\)/g,
+    err_re2 = /    at ([^:]+):(\d+):(\d+)/g;
 
 var Trace = function(first_line, frames, original_error) {
   this.first_line = first_line;
@@ -115,16 +116,24 @@ var trace = function(err) {
       stack = lines.slice(1).join('\n');
 
   var frames = [],
-      match;
+      match1, match2;
 
   do {
-    match = err_re(stack);
-    if(match) {
+    match1 = err_re1(stack);
+    match2 = err_re2(stack);
+
+    if(match1) {
       frames.push(
-        new Frame(match[1], match[2], parseInt(match[3], 10), parseInt(match[4], 10))
+        new Frame(match1[1], match1[2], parseInt(match1[3], 10), parseInt(match1[4], 10))
       );
+      stack = stack.slice(match1.index + match1[0].length);
+    } else if(match2) {
+      frames.push(
+        new Frame('<anonymous>', match2[1], parseInt(match2[2], 10), parseInt(match2[3], 10))
+      );
+      stack = stack.slice(match2.index + match2[0].length);
     }
-  } while(match);
+  } while(stack.length);
 
   return new Trace(first, frames, err);
 };
