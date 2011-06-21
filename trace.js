@@ -113,27 +113,21 @@ var trace = function(err) {
 
   var lines = err.stack.split('\n'),
       first = lines[0],
-      stack = lines.slice(1).join('\n');
+      stack = lines.slice(1);
 
-  var frames = [],
+  var frames,
       match1, match2;
 
-  do {
+  frames = stack.map(function(line) {
     match1 = err_re1(stack);
     match2 = err_re2(stack);
 
     if(match1) {
-      frames.push(
-        new Frame(match1[1], match1[2], parseInt(match1[3], 10), parseInt(match1[4], 10))
-      );
-      stack = stack.slice(match1.index + match1[0].length);
+        return new Frame(match1[1], match1[2], parseInt(match1[3], 10), parseInt(match1[4], 10))
     } else if(match2) {
-      frames.push(
-        new Frame('<anonymous>', match2[1], parseInt(match2[2], 10), parseInt(match2[3], 10))
-      );
-      stack = stack.slice(match2.index + match2[0].length);
+        return new Frame('<anonymous>', match2[1], parseInt(match2[2], 10), parseInt(match2[3], 10))
     }
-  } while(stack.length);
+  });
 
   return new Trace(first, frames, err);
 };
