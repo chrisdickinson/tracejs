@@ -1,6 +1,69 @@
 var fs = require('fs'),
-    natives = process.binding('natives'),
-    color = require('ansi-color').set;
+    tty = require('tty'),
+    natives = process.binding('natives');
+
+var is_tty = function() {
+  return tty.isatty(process.stdout.fd) && tty.isatty(process.stderr.fd);
+};
+
+var Color = function(code) {
+  this.code = code;
+};
+
+Color.prototype.start = function() {
+  Color.stack.push(this);
+  return '\033['+this.code+'m';
+};
+
+Color.prototype.end = function() {
+  Color.stack.pop();
+  return '\033['+Color.stack[Color.stack.length-1].code+'m';
+};
+
+Color.prototype.wrap = function(text) {
+  return this.start() + text + this.end();
+};
+
+var color = is_tty() ?
+  function(code) {
+    return new Color(code);
+  } :
+  function(code) {
+    return {
+      start:function(){return ''},
+      end:function(){return ''},
+      wrap:function(text){ return text; }
+    }
+  };
+
+var colors = {
+  off:color(0),
+  bold:color(1),
+  italic:color(3),
+  underline:color(4),
+  blink:color(5),
+  inverse:color(7),
+  hidden:color(8),
+  black:color(30),
+  red:color(31),
+  green:color(32),
+  yellow:color(33),
+  blue:color(34),
+  magenta:color(35),
+  cyan:color(36),
+  white:color(37),
+  black_bg:color(40),
+  red_bg:color(41),
+  green_bg:color(42),
+  yellow_bg:color(43),
+  blue_bg:color(44),
+  magenta_bg:color(45),
+  cyan_bg:color(46),
+  white_bg:color(47)
+};
+
+Color.stack = [colors.off];
+
 
 var err_re1 = /    at ([^\s]+) \(([\w\d\._\-\/]+):(\d+):(\d+)\)/,
     err_re2 = /    at ([^:]+):(\d+):(\d+)/;
@@ -15,7 +78,7 @@ Trace.defaults = [2, true, 'red'];
 
 Trace.prototype.toString = function(reversed) {
   reversed === undefined && (reversed = true);
-  var args = [].slice.call(args, 1);
+  var args = [].slice.call(arguments, 1);
   args.length === 0 && (args = Trace.defaults.slice());
 
   var frame_data = [this.first_line, '======\n'].concat(this.frames.map(function(frame) {
@@ -65,8 +128,27 @@ Frame.prototype.filedata = function() {
 
 Frame.prototype.toString = function() {
   var args = [].slice.call(arguments);
-  return 'file '+color('"'+this.filename.replace(process.cwd(), '.')+'"', 'cyan')+' line '+color(this.line, 'red+bold')+', char '+color(this.character, 'red+bold')+', in '+color(this.named_location, 'cyan')+':\n'+
-    color(this.get_lines.apply(this, args), 'yellow')+'\n';
+  return [
+    'file ',
+    colors.cyan.wrap('"'+this.filename.replace(process.cwd(), '.')+'"'),
+    ' line ',
+    colors.red.wrap(
+      colors.bold.wrap(
+        this.line
+      )
+    ),
+    ', char ',
+    colors.red.wrap(
+      colors.bold.wrap(
+        this.character
+      )
+    ),
+    ', in ',
+    colors.cyan.wrap(this.named_location),
+    ':\n',
+    colors.yellow.wrap(this.get_lines.apply(this, args)),
+    '\n'
+  ].join('');
 };
 
 Frame.prototype.get_lines = function(context, ascii_cursor, highlight_error_start) {
@@ -77,9 +159,15 @@ Frame.prototype.get_lines = function(context, ascii_cursor, highlight_error_star
       end_line = this.line + context,
       character = this.character;
 
+  start_line < 0 && (start_line = 0);
   var lines = filedata.slice(start_line, end_line);
 
+  if(this.line - context < 0) {
+    context += (this.line - context) - 1;
+  }
+
   if(highlight_error_start) {
+    colors.yellow.start();
     lines = lines.map(function(line, idx) {
       if(idx === context) {
         line = line.split(/\b/g);
@@ -87,7 +175,7 @@ Frame.prototype.get_lines = function(context, ascii_cursor, highlight_error_star
         line = line.map(function(word) {
           var next = start + word.length;
           if(character <= next && character >= start) {
-            word = color(word, highlight_error_start);
+            word = colors[highlight_error_start].wrap(word);
           }
           start = next;
           return word;
@@ -95,6 +183,7 @@ Frame.prototype.get_lines = function(context, ascii_cursor, highlight_error_star
       }
       return line;
     });
+    colors.yellow.end();
   }
   if(ascii_cursor) {
     lines = lines.map(function(line, idx) {
