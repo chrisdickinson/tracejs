@@ -2,13 +2,13 @@ var fs = require('fs'),
     natives = process.binding('natives'),
     color = require('ansi-color').set;
 
-var err_re1 = /    at ([^\s]+) \(([\w\d\._\-\/]+):(\d+):(\d+)\)/g,
-    err_re2 = /    at ([^:]+):(\d+):(\d+)/g;
+var err_re1 = /    at ([^\s]+) \(([\w\d\._\-\/]+):(\d+):(\d+)\)/,
+    err_re2 = /    at ([^:]+):(\d+):(\d+)/;
 
 var Trace = function(first_line, frames, original_error) {
   this.first_line = first_line;
   this.frames = frames;
-  this.original_error;
+  this.original_error = original_error;
 };
 
 Trace.defaults = [2, true, 'red'];
@@ -119,8 +119,8 @@ var trace = function(err) {
       match1, match2;
 
   frames = stack.map(function(line) {
-    match1 = err_re1(stack);
-    match2 = err_re2(stack);
+    match1 = err_re1(line);
+    match2 = err_re2(line);
 
     if(match1) {
         return new Frame(match1[1], match1[2], parseInt(match1[3], 10), parseInt(match1[4], 10))

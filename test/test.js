@@ -63,3 +63,4 @@ try {
   }
 }
 
+console.error('Tests passed');
