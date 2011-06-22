@@ -65,7 +65,7 @@ var colors = {
 Color.stack = [colors.off];
 
 
-var err_re1 = /    at ([^\s]+) \(([\w\d\._\-\/]+):(\d+):(\d+)\)/,
+var err_re1 = /    at (.*?) \(([\w\d\._\-\/]+):(\d+):(\d+)\)/,
     err_re2 = /    at ([^:]+):(\d+):(\d+)/;
 
 var Trace = function(first_line, frames, original_error) {
