@@ -53,6 +53,10 @@ Members:
 *  `first_line`: the first line of the original stack trace -- usually contains the error message, if any.
 *  `original_error`: the original `Error` object that the `Trace` was generated from.
 
+The default output of `Trace#toString` looks like the following:
+
+![trace](http://neversaw.us/media/traces.png)
+
 Trace.defaults
 --------------
 
