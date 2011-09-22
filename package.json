@@ -2,7 +2,7 @@
   "author": "Chris Dickinson <chris@neversaw.us> (http://neversaw.us/)",
   "name": "tracejs",
   "description": "Expand Error.stack traces into usable objects providing context and highlighting",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "homepage": "http://github.com/chrisdickinson/tracejs/",
   "repository": {
     "type": "git",
@@ -13,7 +13,7 @@
   },
   "main": "trace.js",
   "engines": {
-    "node": "0.4.X"
+    "node": ">=0.4.0"
   },
   "dependencies": {},
   "devDependencies": {}
