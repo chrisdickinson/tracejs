@@ -208,8 +208,8 @@ var trace = function(err) {
       match1, match2;
 
   frames = stack.map(function(line) {
-    match1 = err_re1(line);
-    match2 = err_re2(line);
+    match1 = err_re1.exec(line);
+    match2 = err_re2.exec(line);
 
     if(match1) {
         return new Frame(match1[1], match1[2], parseInt(match1[3], 10), parseInt(match1[4], 10))
