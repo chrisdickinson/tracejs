@@ -152,7 +152,7 @@ Frame.prototype.toString = function() {
 };
 
 Frame.prototype.get_lines = function(context, ascii_cursor, highlight_error_start) {
-  context = context || 0; 
+  context = context || 0;
   filedata = this.filedata().split('\n');
 
   var start_line = this.line - context - 1,
@@ -194,10 +194,11 @@ Frame.prototype.get_lines = function(context, ascii_cursor, highlight_error_star
   return lines.join('\n');
 };
 
-var trace = function(err) {
-  if(!err) {
-    err = {};
-    Error.captureStackTrace(err);
+var trace = function trace(err) {
+  err || (err = {});
+
+  if (!err.stack) {
+    Error.captureStackTrace(err, trace);
   }
 
   var lines = err.stack.split('\n'),
