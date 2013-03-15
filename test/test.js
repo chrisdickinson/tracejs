@@ -18,8 +18,9 @@ try {
   local_unnamed(expected);
 } catch(err) {
   var traced = trace(err);
+
   assert.equal(traced.frames.length, err.stack.split('\n').length - 1);
-  assert.equal(traced.frames[0].named_location, '<anonymous>');
+  assert.ok(!!~['<anonymous>', 'local_unnamed'].indexOf(traced.frames[0].named_location));
 
   assert.equal(traced.first_line, err.stack.split('\n')[0]);
   assert.strictEqual(traced.original_error, err);
